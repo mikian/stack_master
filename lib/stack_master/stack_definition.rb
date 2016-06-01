@@ -19,7 +19,12 @@ module StackMaster
     end
 
     def parameter_files
-      [ default_parameter_file_path, region_parameter_file_path ] + additional_parameter_lookup_file_paths
+      [
+        default_parameter_file_path,
+        region_parameter_file_path,
+        *additional_parameter_lookup_file_paths,
+        common_parameter_file_path
+      ]
     end
 
     def stack_policy_file_path
@@ -40,6 +45,10 @@ module StackMaster
 
     def default_parameter_file_path
       File.join(base_dir, 'parameters', "#{underscored_stack_name}.yml")
+    end
+
+    def common_parameter_file_path
+      File.join(base_dir, 'parameters', "#{region}.yml")
     end
 
     def underscored_stack_name
