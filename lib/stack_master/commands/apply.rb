@@ -27,7 +27,7 @@ module StackMaster
       end
 
       def stack
-        @stack ||= Stack.find(region, stack_name)
+        @stack ||= Stack.find(region, cf_stack_name)
       end
 
       def proposed_stack
@@ -51,7 +51,7 @@ module StackMaster
       end
 
       def create_stack
-        unless ask?("Create stack (y/n)? ")
+        unless ask?("Create stack #{stack_options[:stack_name]} (y/n)? ")
           failed!("Stack creation aborted")
         end
         cf.create_stack(stack_options.merge(tags: proposed_stack.aws_tags))
@@ -60,7 +60,7 @@ module StackMaster
       def ask_to_cancel_stack_update
         if ask?("Cancel stack update?")
           StackMaster.stdout.puts "Attempting to cancel stack update"
-          cf.cancel_update_stack(stack_name: stack_name)
+          cf.cancel_update_stack(stack_name: cf_stack_name)
           tail_stack_events
         end
       end
@@ -69,7 +69,7 @@ module StackMaster
         @change_set = ChangeSet.create(stack_options)
         halt!(@change_set.status_reason) if @change_set.failed?
         @change_set.display(StackMaster.stdout)
-        unless ask?("Apply change set (y/n)? ")
+        unless ask?("Apply change set #{stack_options[:stack_name]} (y/n)? ")
           ChangeSet.delete(@change_set.id)
           halt! "Stack update aborted"
         end
@@ -78,7 +78,7 @@ module StackMaster
 
       def stack_options
         {
-          stack_name: stack_name,
+          stack_name: cf_stack_name,
           template_body: proposed_stack.maybe_compressed_template_body,
           parameters: proposed_stack.aws_parameters,
           capabilities: ['CAPABILITY_IAM'],
@@ -88,13 +88,13 @@ module StackMaster
       end
 
       def tail_stack_events
-        StackEvents::Streamer.stream(stack_name, region, io: StackMaster.stdout, from: @from_time)
+        StackEvents::Streamer.stream(cf_stack_name, region, io: StackMaster.stdout, from: @from_time)
       rescue StackMaster::CtrlC
         ask_to_cancel_stack_update
       end
 
       def execute_change_set
-        ChangeSet.execute(@change_set.id, stack_name)
+        ChangeSet.execute(@change_set.id, cf_stack_name)
       rescue StackMaster::CtrlC
         ask_to_cancel_stack_update
       end
@@ -116,7 +116,7 @@ module StackMaster
       end
 
       extend Forwardable
-      def_delegators :@stack_definition, :stack_name, :region
+      def_delegators :@stack_definition, :stack_name, :cf_stack_name, :region
     end
   end
 end

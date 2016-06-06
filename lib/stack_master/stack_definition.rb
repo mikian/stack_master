@@ -14,6 +14,26 @@ module StackMaster
       attribute :additional_parameter_lookup_dirs, Array[String]
     end
 
+    def cf_stack_name
+      @_cf_stack_name ||= begin
+
+        prefix = case tags['Environment']
+        when /production/i
+          'prd'
+        when /staging/i
+          'stg'
+        when /qa/i
+          'qa'
+        when /dev.*/i
+          'dev'
+        else
+          'tst'
+        end
+
+        "#{prefix}-#{stack_name}"
+      end
+    end
+
     def template_file_path
       File.join(base_dir, 'templates', template)
     end
