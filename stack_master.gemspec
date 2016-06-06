@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "diffy"
   spec.add_dependency "colorize"
   spec.add_dependency "activesupport"
-  spec.add_dependency "sparkle_formation", "~> 1.1"
+  spec.add_dependency "sparkle_formation", "~> 3.0"
   spec.add_dependency "table_print"
   spec.add_dependency "dotgpg"
   spec.add_dependency "deep_merge"
