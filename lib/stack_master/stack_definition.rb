@@ -5,6 +5,7 @@ module StackMaster
     values do
       attribute :region, String
       attribute :stack_name, String
+      attribute :cf_stack_name, String
       attribute :template, String
       attribute :tags, Hash
       attribute :notification_arns, Array[String]
@@ -15,22 +16,28 @@ module StackMaster
     end
 
     def cf_stack_name
-      @_cf_stack_name ||= begin
-
-        prefix = case tags['Environment']
-        when /production/i
-          'prd'
-        when /staging/i
-          'stg'
-        when /qa/i
-          'qa'
-        when /dev.*/i
-          'dev'
+      super || @_cf_stack_name ||= begin
+        if stack_name[0] == '-'
+          stack_name[1..-1]
         else
-          'tst'
-        end
 
-        "#{prefix}-#{stack_name}"
+          prefix = case tags['Environment']
+          when /production/i
+            'prd'
+          when /staging/i
+            'stg'
+          when /qa/i
+            'qa'
+          when /dev.*/i
+            'dev'
+          when /test.*/i
+            'tst'
+          else
+            nil
+          end
+
+          [prefix, stack_name].compact.join('-')
+        end
       end
     end
 
