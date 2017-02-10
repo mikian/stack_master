@@ -147,6 +147,8 @@ Parameters are loaded from multiple YAML files, merged from the following lookup
 - parameters/[stack_name].yml
 - parameters/[region]/[underscored_stack_name].yml
 - parameters/[region_alias]/[underscored_stack_name].yml
+- parameters/[region_alias].yml
+- parameters/[region].yml
 
 A simple parameter file could look like this:
 
@@ -306,7 +308,7 @@ vpc_id:
 
 Most resolvers support taking an array of values that will each be resolved.
 Unless stated otherwise in the documentation, the array version of the
-resolver will be named with the [pluralized](http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html#method-i-pluralize) 
+resolver will be named with the [pluralized](http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html#method-i-pluralize)
 name of the original resolver.
 
 When creating a new resolver, one can automatically create the array resolver by adding a `array_resolver` statement

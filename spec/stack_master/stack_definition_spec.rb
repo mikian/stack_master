@@ -17,7 +17,8 @@ RSpec.describe StackMaster::StackDefinition do
   it 'has default and region specific parameter file locations' do
     expect(stack_definition.parameter_files).to eq([
       "/base_dir/parameters/#{stack_name}.yml",
-      "/base_dir/parameters/#{region}/#{stack_name}.yml"
+      "/base_dir/parameters/#{region}/#{stack_name}.yml",
+      "/base_dir/parameters/#{region}.yml"
     ])
   end
 
@@ -30,7 +31,9 @@ RSpec.describe StackMaster::StackDefinition do
       expect(stack_definition.parameter_files).to eq([
         "/base_dir/parameters/#{stack_name}.yml",
         "/base_dir/parameters/#{region}/#{stack_name}.yml",
-        "/base_dir/parameters/production/#{stack_name}.yml"
+        "/base_dir/parameters/production/#{stack_name}.yml",
+        "/base_dir/parameters/production.yml",
+        "/base_dir/parameters/#{region}.yml"
       ])
     end
   end
