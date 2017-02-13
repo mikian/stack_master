@@ -10,7 +10,8 @@ module StackMaster
                   :stack_policy_file,
                   :additional_parameter_lookup_dirs,
                   :s3,
-                  :files
+                  :files,
+                  :profile_name
 
     include Utils::Initializable
 
@@ -33,7 +34,8 @@ module StackMaster
         @secret_file == other.secret_file &&
         @stack_policy_file == other.stack_policy_file &&
         @additional_parameter_lookup_dirs == other.additional_parameter_lookup_dirs &&
-        @s3 == other.s3
+        @s3 == other.s3 &&
+        @profile_name == other.profile_name
     end
 
     def template_dir

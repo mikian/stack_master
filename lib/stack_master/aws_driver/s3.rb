@@ -10,6 +10,11 @@ module StackMaster
         @s3 = nil
       end
 
+      def set_profile_name(profile_name)
+        @profile_name = profile_name
+        @cf = nil
+      end
+
       def upload_files(bucket: nil, prefix: nil, region: nil, files: {})
         raise StackMaster::AwsDriver::S3ConfigurationError, 'A bucket must be specified in order to use S3' unless bucket
 
@@ -59,7 +64,7 @@ module StackMaster
       private
 
       def new_s3_client(region: nil)
-        Aws::S3::Client.new(region: region || @region)
+        Aws::S3::Client.new(region: region || @region, credentials: Aws::SharedCredentials.new(profile_name: @profile_name)))
       end
     end
   end

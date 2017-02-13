@@ -8,6 +8,11 @@ module StackMaster
         @cf = nil
       end
 
+      def set_profile_name(profile_name)
+        @profile_name = profile_name
+        @cf = nil
+      end
+
       def_delegators :cf, :create_change_set,
                           :describe_change_set,
                           :execute_change_set,
@@ -36,7 +41,7 @@ module StackMaster
       private
 
       def cf
-        @cf ||= Aws::CloudFormation::Client.new(region: @region)
+        @cf ||= Aws::CloudFormation::Client.new(region: @region, credentials: Aws::SharedCredentials.new(profile_name: @profile_name))
       end
 
       def retry_with_backoff
