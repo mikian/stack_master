@@ -9,7 +9,6 @@ module StackMaster
       end
 
       def_delegators :cf, :create_change_set,
-                          :describe_change_set,
                           :execute_change_set,
                           :delete_change_set,
                           :delete_stack,
@@ -17,9 +16,14 @@ module StackMaster
                           :describe_stack_resources,
                           :get_template,
                           :get_stack_policy,
-                          :describe_stack_events,
                           :update_stack,
                           :create_stack
+
+      def describe_change_set(options)
+        retry_with_backoff do
+          cf.describe_change_set(options)
+        end
+      end
 
       def describe_stacks(options)
         retry_with_backoff do
@@ -30,6 +34,12 @@ module StackMaster
       def validate_template(options)
         retry_with_backoff do
           cf.validate_template(options)
+        end
+      end
+
+      def describe_stack_events(options)
+        retry_with_backoff do
+          cf.describe_stack_events(options)
         end
       end
 
