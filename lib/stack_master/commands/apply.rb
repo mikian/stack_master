@@ -84,7 +84,7 @@ module StackMaster
           end
 
           @change_set.display(StackMaster.stdout)
-          unless ask?('Create stack (y/n)? ')
+          unless ask?("[#{@stack.stack_name}] Create stack (y/n)? ")
             cf.delete_stack(stack_name: stack_name)
             halt!('Stack creation aborted')
           end
@@ -97,12 +97,12 @@ module StackMaster
       end
 
       def create_stack_directly
-        failed!('Stack creation aborted') unless ask?('Create stack (y/n)? ')
+        failed!('Stack creation aborted') unless ask?("[#{@stack.stack_name}] Create stack (y/n)? ")
         cf.create_stack(stack_options.merge(on_failure: @options.on_failure))
       end
 
       def ask_to_cancel_stack_update
-        if ask?("Cancel stack update?")
+        if ask?("[#{@stack.stack_name}] Cancel stack update?")
           StackMaster.stdout.puts "Attempting to cancel stack update"
           cf.cancel_update_stack(stack_name: stack_name)
           tail_stack_events
@@ -118,7 +118,7 @@ module StackMaster
         end
 
         @change_set.display(StackMaster.stdout)
-        unless ask?("Apply change set (y/n)? ")
+        unless ask?("[#{@stack.stack_name}] Apply change set (y/n)? ")
           ChangeSet.delete(@change_set.id)
           halt! "Stack update aborted"
         end
