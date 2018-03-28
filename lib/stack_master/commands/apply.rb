@@ -35,7 +35,7 @@ module StackMaster
       end
 
       def stack
-        @stack ||= Stack.find(region, stack_name)
+        @stack ||= Stack.find(region, cf_stack_name)
       end
 
       def proposed_stack
@@ -84,12 +84,12 @@ module StackMaster
           end
 
           @change_set.display(StackMaster.stdout)
-          unless ask?("[#{@stack.stack_name}] Create stack (y/n)? ")
-            cf.delete_stack(stack_name: stack_name)
+          unless ask?("[#{stack_name}] Create stack (y/n)? ")
+            cf.delete_stack(stack_name: cf_stack_name)
             halt!('Stack creation aborted')
           end
         rescue StackMaster::CtrlC
-          cf.delete_stack(stack_name: stack_name)
+          cf.delete_stack(stack_name: cf_stack_name)
           raise
         end
 
@@ -97,14 +97,14 @@ module StackMaster
       end
 
       def create_stack_directly
-        failed!('Stack creation aborted') unless ask?("[#{@stack.stack_name}] Create stack (y/n)? ")
+        failed!('Stack creation aborted') unless ask?("[#{stack_name}] Create stack (y/n)? ")
         cf.create_stack(stack_options.merge(on_failure: @options.on_failure))
       end
 
       def ask_to_cancel_stack_update
-        if ask?("[#{@stack.stack_name}] Cancel stack update?")
+        if ask?("[#{stack_name}] Cancel stack update?")
           StackMaster.stdout.puts "Attempting to cancel stack update"
-          cf.cancel_update_stack(stack_name: stack_name)
+          cf.cancel_update_stack(stack_name: cf_stack_name)
           tail_stack_events
         end
       end
@@ -118,7 +118,7 @@ module StackMaster
         end
 
         @change_set.display(StackMaster.stdout)
-        unless ask?("[#{@stack.stack_name}] Apply change set (y/n)? ")
+        unless ask?("[#{stack_name}] Apply change set (y/n)? ")
           ChangeSet.delete(@change_set.id)
           halt! "Stack update aborted"
         end
@@ -154,7 +154,7 @@ module StackMaster
 
       def stack_options
         {
-          stack_name: stack_name,
+          stack_name: cf_stack_name,
           parameters: proposed_stack.aws_parameters,
           tags: proposed_stack.aws_tags,
           capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM'],
@@ -174,13 +174,13 @@ module StackMaster
       end
 
       def tail_stack_events
-        StackEvents::Streamer.stream(stack_name, region, io: StackMaster.stdout, from: @from_time)
+        StackEvents::Streamer.stream(cf_stack_name, region, io: StackMaster.stdout, from: @from_time)
       rescue StackMaster::CtrlC
         ask_to_cancel_stack_update
       end
 
       def execute_change_set
-        ChangeSet.execute(@change_set.id, stack_name)
+        ChangeSet.execute(@change_set.id, cf_stack_name)
       rescue StackMaster::CtrlC
         ask_to_cancel_stack_update
       end
@@ -208,14 +208,14 @@ module StackMaster
         return if proposed_policy.nil? || proposed_policy == current_policy
         StackMaster.stdout.print 'Setting a stack policy...'
         cf.set_stack_policy(
-          stack_name: stack_name,
+          stack_name: cf_stack_name,
           stack_policy_body: proposed_policy
         )
         StackMaster.stdout.puts 'done.'
       end
 
       extend Forwardable
-      def_delegators :@stack_definition, :stack_name, :region
+      def_delegators :@stack_definition, :stack_name, :cf_stack_name, :region
     end
   end
 end

@@ -2,6 +2,7 @@ module StackMaster
   class StackDefinition
     attr_accessor :region,
                   :stack_name,
+                  :cf_stack_name,
                   :template,
                   :tags,
                   :role_arn,
@@ -31,6 +32,7 @@ module StackMaster
       self.class === other &&
         @region == other.region &&
         @stack_name == other.stack_name &&
+        @cf_stack_name == other.cf_stack_name &&
         @template == other.template &&
         @tags == other.tags &&
         @role_arn == other.role_arn &&
@@ -43,6 +45,32 @@ module StackMaster
         @compiler_options == other.compiler_options
     end
 
+    def cf_stack_name
+      @cf_stack_name || @_cf_stack_name ||= begin
+        if stack_name[0] == '-'
+          stack_name[1..-1]
+        else
+          prefix = case tags['AppTier']
+                   when /production/i
+                     'prod'
+                   when /staging/i
+                     'stg'
+                   when /qa/i
+                     'qa'
+                   when /dev.*/i
+                     'dev'
+                   when /test.*/i
+                     'test'
+          end
+          [
+            (tags['Owner'] && tags['Owner'].downcase),
+            prefix,
+            stack_name
+          ].compact.join('-')
+        end
+      end
+    end
+
     def template_file_path
       File.expand_path(File.join(template_dir, template))
     end
@@ -52,13 +80,12 @@ module StackMaster
     end
 
     def s3_files
-      files.inject({}) do |hash, file|
+      files.each_with_object({}) do |file, hash|
         path = File.join(files_dir, file)
         hash[file] = {
           path: path,
           body: File.read(path)
         }
-        hash
       end
     end
 
@@ -89,7 +116,7 @@ module StackMaster
     end
 
     def region_parameter_file_path
-      Dir.glob(File.join(base_dir, 'parameters', "#{region}", "#{underscored_stack_name}.y*ml"))
+      Dir.glob(File.join(base_dir, 'parameters', region.to_s, "#{underscored_stack_name}.y*ml"))
     end
 
     def default_parameter_file_path
@@ -110,7 +137,7 @@ module StackMaster
     end
 
     def underscored_stack_name
-      stack_name.gsub('-', '_')
+      stack_name.tr('-', '_')
     end
   end
 end

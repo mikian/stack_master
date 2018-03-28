@@ -71,7 +71,7 @@ module StackMaster
                             File.read(stack_definition.stack_policy_file_path)
                           end
       new(region: stack_definition.region,
-          stack_name: stack_definition.stack_name,
+          stack_name: stack_definition.cf_stack_name,
           tags: stack_definition.tags,
           parameters: template_parameters,
           template_body: template_body,
