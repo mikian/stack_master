@@ -90,8 +90,7 @@ module StackMaster
     end
 
     def load_config
-      unaliased_stacks = resolve_region_aliases(@config.fetch('stacks'))
-      load_stacks(unaliased_stacks)
+      load_stacks(@config.fetch('stacks'))
     end
 
     def resolve_region_aliases(stacks)
@@ -107,11 +106,12 @@ module StackMaster
         stacks_for_region.each do |stack_name, attributes|
           stack_name = Utils.underscore_to_hyphen(stack_name)
           stack_attributes = build_stack_defaults(region).deeper_merge!(attributes).merge(
-            'region' => region,
+            'region' => unalias_region(region),
             'stack_name' => stack_name,
             'base_dir' => @base_dir,
             'template_dir' => @template_dir,
-            'additional_parameter_lookup_dirs' => @region_to_aliases[region])
+            'additional_parameter_lookup_dirs' => [region]
+          )
           @stacks << StackDefinition.new(stack_attributes)
         end
       end
