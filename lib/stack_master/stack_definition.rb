@@ -95,7 +95,7 @@ module StackMaster
     end
 
     def parameter_files
-      [ default_parameter_file_path, region_parameter_file_path, additional_parameter_lookup_file_paths, common_parameter_file_path ].flatten.compact
+      [ default_parameter_file_path, region_parameter_file_path, additional_parameter_lookup_file_paths, common_parameter_file_path ].flatten.compact.reverse
     end
 
     def stack_policy_file_path
